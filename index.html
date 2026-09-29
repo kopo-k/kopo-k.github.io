@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大石大雅 — ゲームエフェクト ポートフォリオ</title>
+<meta name="description" content="ゲームエフェクトアーティストを目指す大石大雅のポートフォリオ。好きなゲームの分析、制作物、スキルをまとめています。">
+<meta name="theme-color" content="#1A2139">
+<meta property="og:type" content="website">
+<meta property="og:title" content="大石大雅 — ゲームエフェクト ポートフォリオ">
+<meta property="og:description" content="遊ぶ側から作る側へ。ゲームエフェクトを目指す学生のポートフォリオ。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231A2139'/%3E%3Ccircle cx='50' cy='46' r='24' fill='%23F2A03D' stroke='%23151327' stroke-width='6'/%3E%3C/svg%3E">
+<style>
+/* ══════════════════════════════════════════════════
+   夕暮れの田舎 × セルルック
+   ぼかしを一切使わない。輪郭線・段階を持つ塗り・ずらした影だけ。
+   ══════════════════════════════════════════════════ */
+:root{
+  --night:#1A2139;
+  --night-2:#131A2E;
+  --dusk:#3B3F6B;
+  --paper:#F5F0E4;
+  --paper-2:#E5DDCB;
+  --ink:#151327;
+  --ink-2:#403C5E;
+
+  --amber:#F2A03D;   --verm:#E8573F;   --teal:#3B8E93;
+  --mint:#77D6B5;    --plum:#8E6BC4;
+
+  --cream:#F3EEE2;
+  --cream-2:#C0BAAC;
+
+  --line:3px;
+  --pop:6px 6px 0 var(--ink);
+  --pop-sm:4px 4px 0 var(--ink);
+
+  --ja:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--night); color:var(--cream);
+  font-family:var(--ja); font-size:16px; line-height:1.85;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+button{font:inherit; color:inherit; cursor:pointer;}
+a{color:var(--amber); text-underline-offset:3px;}
+:focus-visible{outline:3px solid var(--mint); outline-offset:3px;}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} }
+
+/* ───────── HUD ───────── */
+.hud{
+  position:fixed; inset:0 0 auto 0; z-index:40; height:60px;
+  display:flex; align-items:center; gap:14px; padding:0 18px;
+  background:var(--night-2); border-bottom:var(--line) solid var(--ink);
+}
+.who{font-weight:800; font-size:15.5px; white-space:nowrap;}
+.who span{color:var(--amber);}
+.who small{
+  display:block; font-family:var(--mono); font-size:9.5px;
+  letter-spacing:.2em; color:var(--cream-2); font-weight:400; line-height:1.4;
+}
+.spacer{flex:1;}
+.bars{display:flex; gap:5px;}
+.bars i{
+  display:block; width:22px; height:9px; border-radius:2px;
+  background:var(--dusk); border:2px solid var(--ink); transition:background .15s;
+}
+.bars i.on{background:var(--amber);}
+.stagenum{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; color:var(--cream-2); white-space:nowrap;}
+.stagenum b{color:var(--amber); font-size:15px;}
+@media (max-width:640px){ .bars{display:none;} }
+
+/* ───────── 区画 ───────── */
+section{padding:96px 24px; position:relative; scroll-margin-top:60px;}
+.inner{max-width:880px; margin:0 auto;}
+
+/* ───────── タイトル ───────── */
+#title{
+  min-height:100svh; padding:60px 20px 0; display:flex; align-items:center; justify-content:center;
+}
+.sky{
+  position:absolute; inset:0; overflow:hidden;
+  background:linear-gradient(to bottom,
+    #2B2F5E 0 22%, #5B4A7E 22% 40%, #C4658C 40% 55%,
+    #EE8A54 55% 68%, #F5B65C 68% 78%, #2A2A46 78% 100%);
+}
+.sun{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:200px; height:200px; border-radius:50%; border:none; padding:0;
+  background:radial-gradient(circle at 42% 38%, #FFF3C9 0 26%, #FFD262 26% 62%, #F2A03D 62% 100%);
+  box-shadow:0 0 0 var(--line) var(--ink);
+}
+.hills{position:absolute; left:0; right:0; bottom:0; height:38%;}
+.hills i{position:absolute; bottom:0; background:#171B31; border-top:var(--line) solid var(--ink); border-radius:50% 50% 0 0;}
+.hills i:nth-child(1){left:-12%; width:62%; height:72%;}
+.hills i:nth-child(2){right:-14%; width:66%; height:88%;}
+.hills i:nth-child(3){left:26%; width:52%; height:56%; background:#101427;}
+.paddy{
+  position:absolute; left:0; right:0; bottom:0; height:15%;
+  background:repeating-linear-gradient(to bottom,#0C1021 0 5px,#141A31 5px 11px);
+  border-top:var(--line) solid var(--ink);
+}
+.dots{
+  position:absolute; inset:0; pointer-events:none; opacity:.2;
+  background-image:radial-gradient(#151327 1.5px, transparent 1.6px);
+  background-size:8px 8px;
+  -webkit-mask-image:linear-gradient(to bottom, transparent 0 60%, #000 100%);
+  mask-image:linear-gradient(to bottom, transparent 0 60%, #000 100%);
+}
+.titlewrap{position:relative; z-index:2; text-align:center; padding:40px 0 90px;}
+.role{
+  display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.24em;
+  background:var(--mint); color:#0D2A22;
+  border:var(--line) solid var(--ink); border-radius:999px;
+  padding:6px 18px; box-shadow:var(--pop-sm); margin-bottom:28px;
+}
+.bigname{
+  font-size:clamp(46px,12vw,108px); line-height:1.02; margin:0; font-weight:800;
+  letter-spacing:-.03em; color:var(--paper);
+  -webkit-text-stroke:4px var(--ink); paint-order:stroke fill;
+  text-shadow:9px 9px 0 var(--verm);
+}
+.romaji{
+  font-family:var(--mono); font-size:13px; letter-spacing:.3em;
+  color:var(--paper); margin:20px 0 0; text-shadow:2px 2px 0 var(--ink);
+}
+.start{margin-top:46px; display:flex; flex-direction:column; align-items:center; gap:14px;}
+.startbtn{
+  background:var(--amber); color:#2A1A05; font-weight:800; font-size:17px;
+  border:var(--line) solid var(--ink); border-radius:12px; padding:13px 28px;
+  box-shadow:var(--pop); display:flex; align-items:center; gap:11px;
+  transition:transform .1s, box-shadow .1s;
+}
+.startbtn:hover{transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--ink);}
+.startbtn:active{transform:translate(3px,3px); box-shadow:2px 2px 0 var(--ink);}
+.blink{animation:blink 1.5s steps(1) infinite;}
+@keyframes blink{0%,60%{opacity:1}61%,100%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.blink{animation:none;}}
+.upwarn{font-family:var(--mono); font-size:12.5px; color:#2A2A46; text-shadow:1px 1px 0 rgba(255,255,255,.28);}
+
+/* ───────── 見出し ───────── */
+.label{
+  display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.22em;
+  background:var(--verm); color:#FFF2EE;
+  border:var(--line) solid var(--ink); border-radius:999px;
+  padding:4px 15px; box-shadow:var(--pop-sm); margin-bottom:20px;
+}
+h2{
+  font-size:clamp(28px,5.6vw,46px); line-height:1.2; margin:0 0 16px; font-weight:800;
+  letter-spacing:-.02em; color:var(--paper);
+  -webkit-text-stroke:3px var(--ink); paint-order:stroke fill;
+  text-shadow:5px 5px 0 var(--teal);
+}
+.lede{font-size:17px; color:var(--cream); max-width:58ch; margin:0 0 36px; opacity:.93;}
+h3{font-size:18px; font-weight:800; margin:0 0 8px; color:var(--ink);}
+
+/* ───────── カード ───────── */
+.card{
+  background:var(--paper); color:var(--ink);
+  border:var(--line) solid var(--ink); border-radius:14px;
+  box-shadow:var(--pop); padding:22px 24px; margin:0 0 20px;
+}
+.card p{margin:0 0 12px; color:var(--ink-2); font-size:14.8px; line-height:1.8;}
+.card p:last-child{margin-bottom:0;}
+.card b{color:var(--ink);}
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(252px,1fr)); gap:20px;}
+
+.game{
+  background:var(--paper); color:var(--ink);
+  border:var(--line) solid var(--ink); border-radius:14px;
+  box-shadow:var(--pop); overflow:hidden; display:flex; flex-direction:column;
+}
+.game .cap{
+  padding:11px 16px; border-bottom:var(--line) solid var(--ink);
+  font-weight:800; font-size:16px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.game .cap em{font-style:normal; font-family:var(--mono); font-size:10px; letter-spacing:.1em; opacity:.7;}
+.game ul{margin:0; padding:15px 18px 17px 32px; font-size:14.3px; color:var(--ink-2); line-height:1.75;}
+.game li{margin-bottom:7px;}
+.game li:last-child{margin-bottom:0;}
+.game li b{color:var(--ink); font-weight:700;}
+.c-amber .cap{background:var(--amber); color:#2A1A05;}
+.c-mint  .cap{background:var(--mint);  color:#0D2A22;}
+.c-verm  .cap{background:var(--verm);  color:#FFF2EE;}
+.c-teal  .cap{background:var(--teal);  color:#EAFBFC;}
+.c-plum  .cap{background:var(--plum);  color:#F6F0FF;}
+
+/* ───────── スキル ───────── */
+.skill{display:grid; gap:12px;}
+.sk{
+  background:var(--paper); color:var(--ink);
+  border:var(--line) solid var(--ink); border-radius:12px;
+  box-shadow:var(--pop-sm); padding:14px 18px;
+  display:grid; grid-template-columns:1fr auto; gap:6px 16px; align-items:center;
+}
+.sk .nm{font-weight:800; font-size:15.5px;}
+.sk .lv{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; border:2px solid var(--ink); border-radius:999px; padding:2px 11px; white-space:nowrap;}
+.lv-now{background:var(--amber); color:#2A1A05;}
+.lv-base{background:var(--mint); color:#0D2A22;}
+.lv-next{background:var(--paper-2); color:var(--ink-2);}
+.sk .ds{grid-column:1 / -1; font-size:13.6px; color:var(--ink-2); line-height:1.7;}
+.sk .ds b{color:var(--ink);}
+
+/* ───────── 作品 ───────── */
+.work{
+  background:var(--paper); color:var(--ink);
+  border:var(--line) solid var(--ink); border-radius:14px;
+  box-shadow:var(--pop); padding:20px 22px; display:flex; flex-direction:column; gap:9px;
+}
+.work .tag{
+  align-self:flex-start; font-family:var(--mono); font-size:10px; letter-spacing:.12em;
+  background:var(--teal); color:#EAFBFC; border:2px solid var(--ink);
+  border-radius:999px; padding:2px 11px;
+}
+.work h3{margin:0;}
+.work p{margin:0; font-size:14px; color:var(--ink-2); line-height:1.75;}
+.work .stack{font-family:var(--mono); font-size:11.5px; color:var(--ink-2); opacity:.85;}
+.work.soon{background:repeating-linear-gradient(135deg,var(--paper) 0 12px,var(--paper-2) 12px 24px);}
+.work.soon .tag{background:var(--plum); color:#F6F0FF;}
+
+/* ───────── 連絡先 ───────── */
+.contact{
+  background:var(--paper); color:var(--ink);
+  border:var(--line) solid var(--ink); border-radius:14px;
+  box-shadow:var(--pop); padding:26px 28px;
+}
+.contact dl{display:grid; grid-template-columns:auto 1fr; gap:13px 24px; margin:0;}
+.contact dt{font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--ink-2); padding-top:4px;}
+.contact dd{margin:0; font-size:15.5px; font-weight:700;}
+.ph{color:#A5341F; border-bottom:2px dashed #A5341F;}
+
+footer{
+  padding:40px 24px 56px; text-align:center;
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; color:var(--cream-2);
+  border-top:var(--line) solid var(--ink); background:var(--night-2);
+}
+
+/* ───────── 操作パッド ───────── */
+.pad{
+  position:fixed; right:18px; bottom:18px; z-index:40;
+  display:flex; flex-direction:column; gap:7px; align-items:center;
+}
+.navbtn{
+  background:var(--paper); color:var(--ink);
+  border:2.5px solid var(--ink); border-radius:9px;
+  width:42px; height:36px; box-shadow:4px 4px 0 var(--ink);
+  font-weight:800; font-size:15px; display:flex; align-items:center; justify-content:center;
+  transition:transform .08s, box-shadow .08s;
+}
+.navbtn:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink);}
+.navbtn:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
+.navbtn[disabled]{opacity:.32; pointer-events:none;}
+
+/* ───────── 隠し要素 ───────── */
+.shake{animation:sh .34s;}
+@keyframes sh{0%,100%{transform:translateY(0)}20%{transform:translateY(-9px)}40%{transform:translateY(7px)}60%{transform:translateY(-5px)}80%{transform:translateY(3px)}}
+.secret{position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(10,12,26,.84);}
+.secret.on{display:flex;}
+.secret .box{
+  background:var(--paper); color:var(--ink);
+  border:var(--line) solid var(--ink); border-radius:16px;
+  box-shadow:10px 10px 0 var(--verm); padding:30px 32px; max-width:440px; text-align:center;
+}
+.secret h3{font-size:22px; margin:0 0 10px;}
+.secret p{font-size:14.5px; color:var(--ink-2); margin:0 0 20px; line-height:1.8;}
+.secret button{background:var(--amber); color:#2A1A05; font-weight:800; border:var(--line) solid var(--ink); border-radius:10px; padding:9px 24px; box-shadow:var(--pop-sm);}
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(8px);
+  z-index:60; padding:10px 20px; border-radius:10px;
+  background:var(--paper); color:var(--ink); font-weight:700; font-size:14px;
+  border:var(--line) solid var(--ink); box-shadow:var(--pop-sm);
+  opacity:0; pointer-events:none; transition:opacity .16s, transform .16s;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="who">大石<span>大雅</span><small>GAME VFX</small></div>
+  <div class="spacer"></div>
+  <div class="bars" id="bars"></div>
+  <div class="stagenum">STAGE <b id="cur">1</b> / 6</div>
+</div>
+
+<!-- ══ 1 ══ -->
+<section id="title" data-name="TITLE">
+  <div class="sky">
+    <button class="sun" id="sun" aria-label="夕日"></button>
+    <div class="hills"><i></i><i></i><i></i></div>
+    <div class="paddy"></div>
+    <div class="dots"></div>
+  </div>
+  <div class="titlewrap">
+    <div class="role">GAME VFX ARTIST — 志望</div>
+    <h1 class="bigname">大石大雅</h1>
+    <p class="romaji">OISHI TAIGA</p>
+    <div class="start">
+      <button class="startbtn" id="startBtn"><span class="blink">▼</span> PRESS ↓ TO START</button>
+      <div class="upwarn">↑ は押せません</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 2 ══ -->
+<section id="about" data-name="ABOUT">
+  <div class="inner">
+    <div class="label">ABOUT</div>
+    <h2>作る側に回りたい</h2>
+    <p class="lede">
+      ゲームを遊ぶたびに「この演出はどう作っているのか」を考えるようになり、
+      遊ぶ側から作る側へ進路を変えました。目標はゲームのエフェクトを作ることです。
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>いま</h3>
+        <p>大学で情報系を学んでいます。エンジニアとしてインターンにも参加しましたが、手を動かして絵を作るほうが面白いと気づき、CGへ方向を変えました。</p>
+        <p>Photoshop・After Effects・Substance 3D Painter を並行して学習中です。</p>
+      </div>
+      <div class="card">
+        <h3>これから</h3>
+        <p>専門学校のCGデザイン科へ進み、ゲームエフェクトを本格的に学ぶ予定です。</p>
+        <p>最終的には、自分のゲームを形にするところまで行きたいと考えています。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3>強みにしたいこと</h3>
+      <p>
+        <b>絵と技術の両方を触れること。</b>Webアプリを設計から実装まで自分で作れるので、
+        エフェクトを素材として渡すだけでなく、<b>エンジン側でどう動くかまで想像して作れる</b>ようになりたいと考えています。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 3 ══ -->
+<section id="why" data-name="WHY GAMES">
+  <div class="inner">
+    <div class="label">WHY GAMES</div>
+    <h2>遊びながら、分解している</h2>
+    <p class="lede">
+      好きなゲームを「面白かった」で終わらせず、<strong>何が面白さを作っていたのか</strong>を言葉にしてきました。その記録です。
+    </p>
+
+    <div class="grid">
+      <div class="game c-teal">
+        <div class="cap">APEX LEGENDS <em>UI / UX</em></div>
+        <ul>
+          <li><b>UIが分かりやすい。</b>初見でも何を見ればいいか迷わない</li>
+          <li>死んでも復活できる設計で、<b>失敗の重さが軽い</b></li>
+          <li>理不尽が少なく、ストレスなく遊べる</li>
+          <li>ランクを気にせず遊んでも成立する懐の深さ</li>
+        </ul>
+      </div>
+
+      <div class="game c-mint">
+        <div class="cap">UNDERTALE <em>CONCEPT</em></div>
+        <ul>
+          <li><b>「誰も死ななくていい」</b>という、当時どこにも無かった前提</li>
+          <li>選択でルートが変わり、プレイヤーの判断が物語になる</li>
+          <li>弾幕のような戦闘そのものが遊びとして楽しい</li>
+          <li>キャラクターが立っていて、その世界に居たくなる</li>
+        </ul>
+      </div>
+
+      <div class="game c-amber">
+        <div class="cap">妖怪ウォッチ <em>GAME DESIGN</em></div>
+        <ul>
+          <li><b>ミニゲームの盛り合わせ方が巧み。</b>つい手が伸びる設計</li>
+          <li>普通の少年が特別な日常を送るという<b>ギャップの作り方</b></li>
+          <li>BGMが記憶に残り、世界観を支えている</li>
+        </ul>
+      </div>
+
+      <div class="game c-verm">
+        <div class="cap">スプラトゥーン <em>NEW GENRE</em></div>
+        <ul>
+          <li>触れてこなかったTPSに、<b>塗るという遊びで入り込めた</b></li>
+          <li>武器の種類が多く、自分の戦い方を選べる</li>
+        </ul>
+      </div>
+
+      <div class="game c-plum">
+        <div class="cap">大乱闘スマッシュブラザーズ <em>COMMUNITY</em></div>
+        <ul>
+          <li>みんなでやること自体が楽しい</li>
+          <li>爆弾だけ・バットだけといった<b>自作ルールで遊びが広がる</b></li>
+          <li>本気でもエンジョイでも成立する</li>
+        </ul>
+      </div>
+
+      <div class="game c-teal">
+        <div class="cap">ホラーゲーム <em>ART DIRECTION</em></div>
+        <ul>
+          <li>独特なアートスタイルが、それだけで世界を作っている</li>
+          <li><b>セリフにセンスがある。</b>言葉選びが雰囲気を決めていた</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:22px;">
+      <h3>好きな雰囲気</h3>
+      <p>
+        <b>ノスタルジックなもの</b>に惹かれます。田舎の出身で、田んぼや夕暮れの風景に安心感があるからだと思います。
+        このページの背景も、その原風景を<b>セルルック</b>で描いたものです。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 4 ══ -->
+<section id="skills" data-name="SKILLS">
+  <div class="inner">
+    <div class="label">SKILLS</div>
+    <h2>いまの持ち物</h2>
+    <p class="lede">できることと、これから身につけることを分けて書いています。</p>
+
+    <div class="skill">
+      <div class="sk">
+        <div class="nm">Adobe Photoshop</div><div class="lv lv-now">学習中</div>
+        <div class="ds">レイヤースタイル・描画モード・マスクを使ったゲームUIパーツの制作。加算合成やクリッピングマスクの考え方を、エンジン側の合成と結びつけて理解しています。</div>
+      </div>
+      <div class="sk">
+        <div class="nm">Adobe After Effects</div><div class="lv lv-now">学習中</div>
+        <div class="ds">キーフレーム・イージング・3Dレイヤー・描画系エフェクト。速度グラフでの緩急づけと、連番画像の書き出しまで。</div>
+      </div>
+      <div class="sk">
+        <div class="nm">Substance 3D Painter</div><div class="lv lv-next">入門</div>
+        <div class="ds">メッシュマップのベイクと、スマートマテリアルの仕組み。PBRの4つのマップがそれぞれ何を表しているか。</div>
+      </div>
+      <div class="sk">
+        <div class="nm">Blender</div><div class="lv lv-next">これから</div>
+        <div class="ds">モデリングとUV展開。Substanceへ持ち込む前段として、次に着手します。</div>
+      </div>
+      <div class="sk">
+        <div class="nm">Unity</div><div class="lv lv-base">基礎</div>
+        <div class="ds">Particle Systemの構造とマテリアルのブレンドモード。加算合成でエフェクト素材を重ねる仕組みまで。</div>
+      </div>
+      <div class="sk">
+        <div class="nm">Web（TypeScript / React / Next.js）</div><div class="lv lv-base">実装できる</div>
+        <div class="ds">設計からDB・API・UIまで一人で作れます。CG職としては傍流ですが、<b>ツール制作やパイプライン側で効く武器</b>だと考えています。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 5 ══ -->
+<section id="works" data-name="WORKS">
+  <div class="inner">
+    <div class="label">WORKS</div>
+    <h2>作ったもの</h2>
+    <p class="lede">CG作品はこれから積み上げていきます。いまあるのは、自分で設計して実装まで持っていったものです。</p>
+
+    <div class="grid">
+      <div class="work">
+        <div class="tag">WEB APP</div>
+        <h3>Branch — マインドマップ</h3>
+        <p>キーボードだけで書き切れる思考整理ツール。自動レイアウトを組みつつ、手で位置を調整できる仕組みを自作しました。木構造とレイアウト計算を純粋関数に切り出し、単体テストで検証しています。</p>
+        <div class="stack">Next.js / TypeScript / Drizzle ORM / Postgres</div>
+      </div>
+      <div class="work">
+        <div class="tag">WEB APP</div>
+        <h3>かんたん家計簿</h3>
+        <p>入力の手数を減らすことに絞った家計簿。端末間の同期APIを自分で書き、エッジ環境にデプロイしています。</p>
+        <div class="stack">React / TypeScript / Vite / Cloudflare</div>
+      </div>
+      <div class="work">
+        <div class="tag">THIS SITE</div>
+        <h3>このポートフォリオ</h3>
+        <p>セルルックをWebで再現しました。ぼかしを一切使わず、太い輪郭線・段階を持つ塗り・ずらした影だけで構成しています。背景の夕暮れもCSSのみで、画像は1枚も使っていません。</p>
+        <div class="stack">HTML / CSS / JavaScript</div>
+      </div>
+      <div class="work soon">
+        <div class="tag">COMING</div>
+        <h3>ゲームエフェクト</h3>
+        <p>斬撃・爆発・魔法陣を、Photoshopでの素材制作からAfter Effectsでの連番書き出し、Unityでの実装まで一通り通した作品を制作予定です。</p>
+        <div class="stack">Photoshop / After Effects / Unity</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 6 ══ -->
+<section id="contact" data-name="CONTACT">
+  <div class="inner">
+    <div class="label">CONTACT</div>
+    <h2>ご連絡ください</h2>
+    <p class="lede">制作のご依頼、学校・企業の方からのご連絡をお待ちしています。</p>
+
+    <div class="contact">
+      <dl>
+        <dt>MAIL</dt><dd><span class="ph">ここにメールアドレス</span></dd>
+        <dt>X</dt><dd><span class="ph">@ここにID</span></dd>
+        <dt>ArtStation</dt><dd><span class="ph">準備中</span></dd>
+        <dt>GitHub</dt><dd><span class="ph">ここにURL</span></dd>
+      </dl>
+    </div>
+
+    <div class="card" style="margin-top:22px;">
+      <h3>このサイトについて</h3>
+      <p>
+        「ゲームの要素があるポートフォリオにしたい」という発想から、STAGE表記と方向キー操作を取り入れました。
+        <b>隠し要素も入れてあります。</b>ブラウザの開発者ツールを開くと、何か見つかるかもしれません。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 OISHI TAIGA — BUILT WITH NO IMAGES</footer>
+
+<div class="pad">
+  <button class="navbtn" id="prev" aria-label="前のセクションへ">↑</button>
+  <button class="navbtn" id="next" aria-label="次のセクションへ">↓</button>
+</div>
+
+<div class="secret" id="secret" role="dialog" aria-modal="true" aria-labelledby="secretTitle">
+  <div class="box">
+    <h3 id="secretTitle">見つけましたね</h3>
+    <p>夕日を3回押すと出るようにしてありました。<br>こういう「押したくなる仕掛け」を作るのが好きです。</p>
+    <button id="closeSecret">閉じる</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var secs = Array.prototype.slice.call(document.querySelectorAll('section'));
+  var total = secs.length;
+  var cur = document.getElementById('cur');
+  var bars = document.getElementById('bars');
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var toast = document.getElementById('toast');
+  var idx = 0;
+
+  for (var i = 0; i < total; i++) bars.appendChild(document.createElement('i'));
+  var dots = bars.querySelectorAll('i');
+
+  function paint(){
+    cur.textContent = idx + 1;
+    for (var i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i <= idx);
+    prev.disabled = idx === 0;
+    next.disabled = idx === total - 1;
+  }
+
+  function say(msg){
+    toast.textContent = msg;
+    toast.classList.add('on');
+    clearTimeout(say._t);
+    say._t = setTimeout(function(){ toast.classList.remove('on'); }, 1800);
+  }
+
+  // 「倒せない方向に押すと」── 端で押したときの反応
+  function blocked(){
+    document.body.classList.add('shake');
+    setTimeout(function(){ document.body.classList.remove('shake'); }, 360);
+    say(idx === 0 ? 'ここが最初です' : 'ここが最後です');
+  }
+
+  function go(i){
+    if (i < 0 || i >= total) return false;
+    secs[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return true;
+  }
+
+  // いま画面の中心に来ている区画を現在地とする
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (!en.isIntersecting) return;
+      var n = secs.indexOf(en.target);
+      if (n >= 0 && n !== idx){ idx = n; paint(); }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+  secs.forEach(function(s){ io.observe(s); });
+
+  prev.addEventListener('click', function(){ if (!go(idx - 1)) blocked(); });
+  next.addEventListener('click', function(){ if (!go(idx + 1)) blocked(); });
+  document.getElementById('startBtn').addEventListener('click', function(){ go(1); });
+
+  window.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    if (e.key === 'ArrowDown'){ e.preventDefault(); if (!go(idx + 1)) blocked(); }
+    if (e.key === 'ArrowUp'){ e.preventDefault(); if (!go(idx - 1)) blocked(); }
+    if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    if (e.key === 'End'){ e.preventDefault(); go(total - 1); }
+    if (e.key === 'Escape') document.getElementById('secret').classList.remove('on');
+  });
+
+  // ── 隠し要素 1: 夕日を3回押す ──
+  var hits = 0;
+  var secret = document.getElementById('secret');
+  document.getElementById('sun').addEventListener('click', function(){
+    hits++;
+    if (hits === 2) say('あと1回');
+    if (hits >= 3){ secret.classList.add('on'); hits = 0; }
+  });
+  document.getElementById('closeSecret').addEventListener('click', function(){ secret.classList.remove('on'); });
+  secret.addEventListener('click', function(e){ if (e.target === secret) secret.classList.remove('on'); });
+
+  paint();
+
+  // ── 隠し要素 2: 開発者ツールを開いた人へ ──
+  console.log('%c\n  ____                       _\n | __ ) _ __ __ _ _ __   ___| |__\n |  _ \\| \'__/ _` | \'_ \\ / __| \'_ \\\n | |_) | | | (_| | | | | (__| | | |\n |____/|_|  \\__,_|_| |_|\\___|_| |_|\n',
+    'color:#F2A03D; font-family:monospace; font-size:12px;');
+  console.log('%cここまで開いてくれてありがとうございます。', 'color:#77D6B5; font-size:14px; font-weight:bold;');
+  console.log('%cこのページは画像を1枚も使っていません。背景の夕暮れも全部CSSです。\nセルルックの肝は「ぼかしを使わないこと」でした。\n\nヒント: タイトル画面の夕日は、3回押せます。',
+    'color:#C0BAAC; font-size:12px; line-height:1.8;');
+})();
+</script>
+</body>
+</html>
